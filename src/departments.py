@@ -8,10 +8,10 @@ class Facility(RandomEntry):
     phone_number: PhoneNumber
     requires_shipment: bool
 
-    def tuplefy(self) -> Tuple:
+    def to_tuple(self) -> Tuple:
         return (self.id,) + \
-               self.address.tuplefy() + \
-               self.phone_number.tuplefy() + \
+               self.address.to_tuple() + \
+               self.phone_number.to_tuple() + \
                (self.requires_shipment,)
 
 
@@ -64,10 +64,10 @@ class CleaningFacility(Facility):
             ", ".join(choice(defect_types, rand_from_bounds(CleaningFacility.defect_type_bounds)))
         )
 
-    def tuplefy(self) -> Tuple:
+    def to_tuple(self) -> Tuple:
         return (self.id,) + \
-               self.address.tuplefy() + \
-               self.phone_number.tuplefy() + \
+               self.address.to_tuple() + \
+               self.phone_number.to_tuple() + \
                (self.requires_shipment,
                 self.acceptable_clothing_types,
                 self.acceptable_defect_types)
