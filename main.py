@@ -49,9 +49,13 @@ def init(conn: connection, db_name: str) -> None:
     execute_query(conn, f"create database {db_name}; commit; create schema dryclean; commit;")
     print("--Database and schema created.")
 
-def create(conn: connection) -> None:
-    execute_script(conn, "sql\\create_tables.sql")
-    print("--Database tables created.")
+def create(conn: connection, db_dump: str) -> None:
+    #if db_dump is None:
+        execute_script(conn, "sql\\create_tables.sql")
+        print("--Database tables created.")
+
+    #else:
+
 
 def drop(conn: connection) -> None:
     execute_script(conn, "sql\\drop_tables.sql")
@@ -98,7 +102,7 @@ def parse_args(args: List[str]) -> Dict[str, Union[None, bool, str]]:
 
     # program args for database
     parser.add_argument("--init", action="store_true", help="creates database and schema if it does not exist")
-    parser.add_argument("--create", action="store_true", help="creates database tables if they don't exist")
+    parser.add_argument("--create", nargs='?', type=str, default=None, action="store_true", help="creates database tables if they don't exist")
     parser.add_argument("--drop", action="store_true", help="drops database tables if they exist")
     parser.add_argument("--recreate", action="store_true", help="drops and creates database tables")
     parser.add_argument("--fill", action="store_true", help="fills database with randomly generated values")
@@ -145,7 +149,7 @@ def main(args: List[str]) -> None:
             if not parsed_args["init"]:
                 drop(conn)
         if parsed_args["create"]:
-            create(conn)
+            create(conn)#, parsed_args["create"])
 
     if parsed_args["clear"] and not parsed_args["drop"]:
         clear(conn)
