@@ -10,6 +10,9 @@ class Person(RandomEntry):
     phone_number: PhoneNumber
     email: Email
 
+    # def __eq__(self, other):
+    #     return self.name == other.name and \
+    #            self.phone_number == other.phone_number
 
 @dataclass(frozen=True)
 class Customer(Person):

@@ -49,7 +49,7 @@ def init(conn: connection, db_name: str) -> None:
     execute_query(conn, f"create database {db_name}; commit; create schema dryclean; commit;")
     print("--Database and schema created.")
 
-def create(conn: connection, db_dump: str) -> None:
+def create(conn: connection) -> None:
     #if db_dump is None:
         execute_script(conn, "sql\\create_tables.sql")
         print("--Database tables created.")
@@ -102,18 +102,18 @@ def parse_args(args: List[str]) -> Dict[str, Union[None, bool, str]]:
 
     # program args for database
     parser.add_argument("--init", action="store_true", help="creates database and schema if it does not exist")
-    parser.add_argument("--create", nargs='?', type=str, default=None, action="store_true", help="creates database tables if they don't exist")
+    parser.add_argument("--create", action="store_true", help="creates database tables if they don't exist")
     parser.add_argument("--drop", action="store_true", help="drops database tables if they exist")
     parser.add_argument("--recreate", action="store_true", help="drops and creates database tables")
     parser.add_argument("--fill", action="store_true", help="fills database with randomly generated values")
-    parser.add_argument("--layout", nargs='?', type=str, default=None, action="store",
-                        help="database layout JSON configuration file: pairs of entry name and instance count")
+    #parser.add_argument("--layout", nargs='?', type=str, default=None, action="store",
+    #                    help="database layout JSON configuration file: pairs of entry name and instance count")
     parser.add_argument("--clear", action="store_true", help="truncates every table")
-    parser.add_argument("--queries", "-q", action="store_true", help="executes all pre-created SQL scripts")
+    #parser.add_argument("--queries", "-q", action="store_true", help="executes all pre-created SQL scripts")
 
     # additional program args
-    parser.add_argument("--execute", "-e", nargs='?', type=str, action="store", help="executes the defined SQL script")
-    parser.add_argument("--interactive", "-i", action="store_true", help="enters into interactive mode allowing for executing of entered SQL queries")
+    #parser.add_argument("--execute", "-e", nargs='?', type=str, action="store", help="executes the defined SQL script")
+    #parser.add_argument("--interactive", "-i", action="store_true", help="enters into interactive mode allowing for executing of entered SQL queries")
 
     return vars(parser.parse_args())
 
@@ -155,11 +155,11 @@ def main(args: List[str]) -> None:
         clear(conn)
 
     if parsed_args["fill"]:
-        if parsed_args["layout"]:
-            data: Dict[str, int] = dict()
-            with open(parsed_args["layout"], "r") as f:
-                data: Dict[str, int] = json.load(f)
-            RandomEntryFactory.set_layout(data)
+        #if parsed_args["layout"]:
+            #data: Dict[str, int] = dict()
+            #with open(parsed_args["layout"], "r") as f:
+             #   data: Dict[str, int] = json.load(f)
+            #RandomEntryFactory.set_layout(data)
 
         fill(conn)
 

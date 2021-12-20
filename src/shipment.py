@@ -43,7 +43,7 @@ class Shipment(RandomEntry):
     ], dtype=ShipmentJob)
 
     @staticmethod
-    def __jot_to_ids__(job: ShipmentJob, department_id: int, cleaning_department: int) -> None:
+    def __jot_to_ids__(job: ShipmentJob, department_id: int, cleaning_department: int) -> Tuple[int, int]:
         """sets ids needed for specified job"""
 
         if job == ShipmentJob.dpt_to_sort or job == ShipmentJob.sort_to_dpt:
@@ -56,6 +56,7 @@ class Shipment(RandomEntry):
             pass # truck driver gets addresses from customer_ids from clothing order_ids
         else:
             raise ValueError("Impossible shipment job")
+        return department_id, cleaning_department
 
     def create(working_trucks: List[WorkingTruck], shipment_to_w_trucks_ratio: int) -> RandomValue:
         job: ShipmentJob = choice(Shipment.possible_job_types)
@@ -66,7 +67,7 @@ class Shipment(RandomEntry):
         cleaning_department_id: int = None
 
         # setting ids
-        Shipment.__jot_to_ids__(job, department_id, cleaning_department_id)
+        department_id, cleaning_department_id = Shipment.__jot_to_ids__(job, department_id, cleaning_department_id)
 
         job: str = job.value
 

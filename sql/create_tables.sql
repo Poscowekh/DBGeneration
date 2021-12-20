@@ -103,7 +103,7 @@ create table if not exists dryclean.trucks (
         references dryclean.couriers(id)
             on delete set null,
 
-    label char(20),
+    label char(30),
     is_in_working_condition boolean not null default true,
 
     constraint "trucks that are not in working condition can not be driven"

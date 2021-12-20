@@ -46,6 +46,20 @@ class Order(RandomEntry):
     customer_comment: str
     delivery_comment: str
 
+    def __eq__(self, other) -> bool:
+        return self.customer_id == other.customer_id and \
+               self.manager_id == other.manager_id and \
+               self.department_id == other.department_id and \
+               self.is_prepayed == other.is_prepayed and \
+               self.is_express == other.is_express and \
+               self.to_be_delievered == other.to_be_delievered and \
+               self.creation_date == other.creation_date and \
+               self.due_date == other.due_date and \
+               self.actual_finish_date == other.actual_finish_date and \
+               self.status == other.status and \
+               self.customer_comment == other.customer_comment and \
+               self.delivery_comment == other.delivery_comment
+
     possible_due_date_delays: ClassVar[array_t] = array([
         timedelta(days=4), timedelta(days=4),
         timedelta(days=7), timedelta(days=7)
@@ -126,7 +140,7 @@ class Order(RandomEntry):
             to_be_delievered,
 
             none_or(choice(Order.possible_customer_comments)),  # customer comment
-            none_or(choice(Order.possible_delivery_comments))   # delivery comment
+            none_or(choice(Order.possible_delivery_comments)) if to_be_delievered else None # delivery comment
         )
 
 @dataclass

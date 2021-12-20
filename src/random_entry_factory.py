@@ -32,16 +32,16 @@ class RandomEntryFactory(RandomValueFactory):
     """Defines the order to create entries in"""
 
     __layout__: Dict[type, int] = {
-        Department: 25,
-        SortingDepartment: 5,
-        CleaningDepartment: 10,
-        Courier: 35,
-        Manager: 50,
-        Customer: 300,
-        Truck: 20,
-        Order: 400,
-        Shipment: 50,
-        Clothing: 700
+        Department: 250,
+        SortingDepartment: 50,
+        CleaningDepartment: 100,
+        Courier: 450,
+        Manager: 600,
+        Customer: 3500,
+        Truck: 400,
+        Order: 5000,
+        Shipment: 600,
+        Clothing: 10000
     }
     """The layout of database: amount of entries to create for each of tables"""
 
@@ -99,6 +99,10 @@ class RandomEntryFactory(RandomValueFactory):
         building_id += RandomEntryFactory.__layout__[CleaningDepartment]
         print(f"----generated {RandomEntryFactory.__layout__[CleaningDepartment]} cleaning departments;")
 
+        # clear up data to speed up and save space
+        PhoneNumber.__instances__ = list()
+        Address.__instances__ = list()
+
         person_id: int = 1
 
         for id in range(person_id, person_id + RandomEntryFactory.__layout__[Courier]): #type: int
@@ -116,12 +120,20 @@ class RandomEntryFactory(RandomValueFactory):
         person_id += RandomEntryFactory.__layout__[Customer]
         print(f"----generated {RandomEntryFactory.__layout__[Customer]} customers;")
 
+        # clear up to save space again
+        Date.__instances__ = list()
+        Email.__instances__ = list()
+        PhoneNumber.__instances__ = list()
+        Address.__instances__ = list()
+
         for id in range(1, RandomEntryFactory.__layout__[Truck] + 1): #type: int
             RandomEntryFactory.create_truck(id)
         print(f"----generated {RandomEntryFactory.__layout__[Truck]} trucks;")
 
         for id in range(1, RandomEntryFactory.__layout__[Order] + 1): #type: int
             RandomEntryFactory.create_order(id)
+            if id % 3000 == 0:
+                Date.__instances__ = list() # allow not unique dates
         print(f"----generated {RandomEntryFactory.__layout__[Order]} order;")
 
         for id in range(1, RandomEntryFactory.__layout__[Shipment] + 1): #type: int

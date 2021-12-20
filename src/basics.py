@@ -141,10 +141,17 @@ class Address(RandomValue):
     house: str = field(repr=None)
     postcode: str = field(repr=None)
 
+    def __eq__(self, other) -> bool:
+        return self.postcode == other.postcode and \
+               self.city == other.city and \
+               self.street == other.street and \
+               self.house == pther.house
+
     __full_address__: str = field(default=None, init=False)
 
     possible_cities: ClassVar[array_t] = array([
-        "г. Москва"
+        "г. Москва", "г. Москва", "г. Москва", "г. Москва", "г. Москва", "г. Москва",
+        "г. Химки", "г. Видное", "г. Долгопрудный"
     ], dtype=str)
     """Cities to use in generation"""
 
@@ -195,7 +202,7 @@ class Date(RandomValue):
 
     value: datetime
 
-    earliest_year: ClassVar[datetime] = datetime(2018, 1, 1)
+    earliest_year: ClassVar[datetime] = datetime(2011, 1, 1)
 
     def create(**kwargs) -> RandomValue:
         from_date: Union[None, Date] = kwargs["from_date"] if kwargs is not None else None
@@ -241,7 +248,7 @@ def rand_bool(upper_bound: int = 1) -> bool:
     # if upper_bound < 1:
     #     raise ValueError("upper_bound must be at least 1")
 
-    return False if randint(0, upper_bound) == 0 else True
+    return False if randint(0, upper_bound + 1) == 0 else True
 
 
 def none_or(any: Any) -> Union[None, Any]:

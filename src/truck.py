@@ -20,13 +20,15 @@ class Truck(RandomEntry):
     def create(active_couriers: List[ActiveCourier], *args, **kwargs) -> RandomEntry:
         courier_id: int = None
 
-        if rand_bool():
-            courier_id, _ = ActiveCourier.choose_unused(active_couriers)
+        is_in_working_condition: bool = rand_bool(7)
+        if is_in_working_condition:
+            if rand_bool():
+                courier_id, _ = ActiveCourier.choose_unused(active_couriers)
 
         return Truck(
             courier_id,
             none_or(choice(Truck.possible_labels)),
-            rand_bool(7)
+            is_in_working_condition
         )
 
     def __eq__(self, other):

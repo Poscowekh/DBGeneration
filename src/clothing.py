@@ -34,8 +34,8 @@ class Clothing(RandomEntry):
     name: str
     comment: str
 
-    type_bounds: ClassVar[Bounds] = Bounds(1, 3)
-    defect_type_bounds: ClassVar[Bounds] = Bounds(1, 4)
+    type_bounds: ClassVar[Bounds] = Bounds(1, 1) # 3)
+    defect_type_bounds: ClassVar[Bounds] = Bounds(1, 1) # 4)
 
     possible_clothing_names: ClassVar[array_t] = array([
         "PlaceholderClothingName"
@@ -53,7 +53,11 @@ class Clothing(RandomEntry):
         "PlaceholderClothingComment"
     ], dtype=str)
 
+    i: ClassVar = 0
+
     def create(unfinished_orders: List[UnfinishedOrder], *args, **kwargs) -> RandomEntry:
+        Clothing.i += 1
+
         status: ClothingStatus = choice(Clothing.possible_statuses)
 
         order_id: int = choice(unfinished_orders).id
@@ -68,8 +72,8 @@ class Clothing(RandomEntry):
             order_id,
             shipment_id,
             status,
-            none_or(choice(clothing_types, Clothing.type_bounds.random())),
-            none_or(choice(defect_types, Clothing.defect_type_bounds.random())),
+            none_or(", ".join(choice(clothing_types, Clothing.type_bounds.random()))),
+            none_or(", ".join(choice(defect_types, Clothing.defect_type_bounds.random()))),
             none_or(choice(Clothing.possible_clothing_names)),
             none_or(choice(Clothing.possible_clothing_comment))
         )
