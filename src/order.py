@@ -1,101 +1,136 @@
-from datetime import timedelta
-from basic_factory import *
+from src.random_value_factory import *
+from src.departments import Department
+from src.people import Manager, NotBannedCustomer, Courier
 from enum import Enum
 
-class Status(Enum):
-    initiated = "initiated",
-    being_shipped = "being shipped",
-    being_sorted_for_cleaning = "being sorted for cleaning",
-    being_cleaned = "being cleaned",
-    being_sorted_for_delivery_back = "being sorted for delivery back",
-    delievered_back_to_department = "delievered back to department",
-    delievered_to_client = "delievered to client"
+
+class OrderStatus(Enum):
+    """
+    Status of an order as a whole.\n
+    For example:
+    \t1) if none clothing piece is yet delievered back from cleaning department then status should be 'being_cleaned'
+    \t2) if at least one piece of clothing is not yet delievered back from cleaning department then status should be 'awaiting_other_clothes'
+    """
+
+    created = "created"
+    being_cleaned = "being cleaned"
+    awaiting_other_clothes = "awaiting other clothes"
+    arrived_back_to_department = "arrived back to department"
+    arrived_to_customer = "arrived to customer"
 
 
 @dataclass(frozen=True)
 class Order(RandomEntry):
+    __instances__: ClassVar[List[RandomEntry]] = list()
+    """List of known instances of this class"""
+
+    table_name: ClassVar[str] = "orders"
+
     customer_id: int
     department_id: int
+    manager_id: int
 
+    # dates
     creation_date: Date
     due_date: Date
     actual_finish_date: Date
 
-    possible_due_date_delays: ClassVar = nparray([
-        timedelta(days=2), # express
-        timedelta(days=4), timedelta(days=4),
-        timedelta(days=7), timedelta(days=7)
-    ], dtype=timedelta)
+    status: str
 
-    possible_actual_finish_date_deltas: ClassVar = nparray([
-        -timedelta(days=1), -timedelta(days=1),
-        timedelta(), timedelta(), timedelta(),
-        timedelta(days=1), timedelta(days=1),
-        timedelta(days=2)
-    ], dtype=timedelta)
-
-    current_status: str
-
-    possible_statuses: ClassVar = nparray([
-        Status.initiated,
-        Status.being_shipped,
-        Status.being_sorted_for_cleaning,
-        Status.being_cleaned,
-        Status.being_sorted_for_delivery_back,
-        Status.delievered_back_to_department, Status.delievered_back_to_department, # for twice the chance
-        Status.delievered_to_client, Status.delievered_to_client # for twice the chance
-    ], dtype=Status)
-
+    # flags
     is_prepayed: bool
     is_express: bool
     to_be_delievered: bool
 
+    # comments
     customer_comment: str
     delivery_comment: str
 
-    possible_customer_comments: ClassVar = nparray([
+    possible_due_date_delays: ClassVar[array_t] = array([
+        timedelta(days=4), timedelta(days=4),
+        timedelta(days=7), timedelta(days=7)
+    ], dtype=timedelta)
+    """Time periods in days between order creation and due date"""
+
+    possible_actual_finish_date_deltas: ClassVar[array_t] = array([
+        -timedelta(days=1), -timedelta(days=1), -timedelta(days=1),
+        timedelta(days=0), timedelta(days=0), timedelta(days=0),
+        timedelta(days=1), timedelta(days=1)
+    ], dtype=timedelta)
+    """Time periods in days between order creation an actual finish date"""
+
+    possible_statuses: ClassVar[array_t] = array([
+        OrderStatus.created,
+        OrderStatus.being_cleaned,
+        OrderStatus.awaiting_other_clothes,
+        OrderStatus.arrived_back_to_department,
+        OrderStatus.arrived_to_customer
+    ], dtype=OrderStatus)
+
+    possible_customer_comments: ClassVar[array_t] = array([
         "PlaceholderCustomerComment"
     ], dtype=str)
 
-    possible_delivery_comments: ClassVar = nparray([
+    possible_delivery_comments: ClassVar[array_t] = array([
         "PlaceholderDeliveryComment"
     ], dtype=str)
 
-    def create(customer_id_bounds: Tuple[int, int],
-               department_id_bounds: Tuple[int, int],
-               *args,
-               **kwargs):
-        id = Order.latest_id
-        Order.latest_id += 1
-
-        creation_date = BasicFactory.create_date()
-        due_date = creation_date + choice(Order.possible_due_date_delays)
+    def create(not_banned_customers: List[NotBannedCustomer], *args, **kwargs) -> RandomEntry:
+        creation_date: Date = RandomValueFactory.create_date()
+        due_date: Date = None
 
         is_express = rand_bool()
         if is_express:
             due_date = creation_date + timedelta(days=2)
+        else:
+            due_date = creation_date + choice(Order.possible_due_date_delays)
 
-        status = choice(Order.possible_statuses)
+        status: OrderStatus = choice(Order.possible_statuses)
 
-        finished_date = None
-        if status == Status.delievered_to_client or status.delievered_back_to_department:
-            finished_date = creation_date + choice(Order.possible_actual_finish_date_deltas)
+        finished_date: Date = None
+        if status == OrderStatus.arrived_back_to_department or status == OrderStatus.arrived_to_customer:
+            finished_date = due_date + choice(Order.possible_actual_finish_date_deltas)
 
-        to_be_delievered = rand_bool()
-        if status == Status.delievered_to_client:
+        to_be_delievered: bool = None
+        if status == OrderStatus.arrived_to_customer:
             to_be_delievered = True
+        elif status == OrderStatus.arrived_back_to_department:
+            to_be_delievered = False
+        else:
+            to_be_delievered = rand_bool()
+
+        status: str = status.value
+
+        delivery_comment: str = none_or(choice(Order.possible_delivery_comments))
+
+        if not to_be_delievered:
+            delivery_comment = None
+
+        customer_id: int = choice(not_banned_customers).id
+        department_id: int = Department.bounds(Department).random()
+        manager_id: int = Manager.bounds(Manager).random() + Courier.bounds(Courier).count()
 
         return Order(
-            id,
-            rand_from_bounds(customer_id_bounds),
-            rand_from_bounds(department_id_bounds),
+            customer_id,
+            department_id,
+            manager_id,
+
             creation_date,
             due_date,
             finished_date,
-            status.value,
-            rand_bool(),
-            rand_bool(),
+
+            status,
+
+            rand_bool(), # is_prepayed
+            is_express,
             to_be_delievered,
-            None, # choice(Order.possible_customer_comments)
-            None # choice(Order.possible_delivery_comments)
+
+            none_or(choice(Order.possible_customer_comments)),  # customer comment
+            none_or(choice(Order.possible_delivery_comments))   # delivery comment
         )
+
+@dataclass
+class UnfinishedOrder(GeneratedEntry):
+    """Order with one of not-finished statuses"""
+
+    entry: Order

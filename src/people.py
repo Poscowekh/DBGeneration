@@ -1,91 +1,101 @@
-from basic_factory import *
+from src.random_value_factory import *
+from src.departments import Department
 
 
 @dataclass(frozen=True)
 class Person(RandomEntry):
+    table_name: ClassVar[str] = "people"
+
     name: str
     phone_number: PhoneNumber
+    email: Email
 
 
 @dataclass(frozen=True)
 class Customer(Person):
-    email: Email
+    __instances__: ClassVar[List[Person]] = list()
+    """List of known instances of this class"""
+
+    table_name: ClassVar[str] = "customers"
+
     address: Address
     is_banned: bool
 
     def create(*args, **kwargs) -> Person:
-        id = Customer.latest_id
-        Customer.latest_id += 1
+        email: Email = None
+        address: Address = None
+
+        if rand_bool(3):
+            email = RandomValueFactory.create_email()
+
+        if rand_bool(3) or email is None:
+            address = RandomValueFactory.create_address()
 
         return Customer(
-            id,
             fake.name(),
-            BasicFactory.create_phone_number(),
-            BasicFactory.create_email(),
-            BasicFactory.create_address(),
-            False # rand_bool()
+            RandomValueFactory.create_phone_number(),
+            email,
+            address,
+            not rand_bool(10)
         )
 
-    def tuplefy(self) -> Tuple:
-        return (self.id,
-                self.name) + \
-               self.phone_number.tuplefy() + \
-               self.email.tuplefy() + \
-               self.address.tuplefy() + \
-               (self.is_banned,)
+
+@dataclass
+class NotBannedCustomer(GeneratedEntry):
+    """Generated customer entry without is_banned flag"""
+
+    entry: Customer
 
 
 @dataclass(frozen=True)
 class Manager(Person):
-    department_id: int
-    email: Email
-    position: str
+    __instances__: ClassVar[List[Person]] = list()
+    """List of known instances of this class"""
 
-    possible_positions: ClassVar = nparray(
+    table_name: ClassVar[str] = "managers"
+
+    department_id: int
+    position: str
+    is_active: bool
+
+    possible_positions: ClassVar[array_t] = array(
         ["Manager"] * 9 + # probability is 9/13
         ["Senior Manager"] * 3 + # probability is 3/13
         ["General Manager"], # probability is 1/13
         dtype=str)
 
-    def create(department_id_bounds: Tuple[int, int], *args, **kwargs) -> Person:
-        id = Manager.latest_id
-        Manager.latest_id += 1
-
+    def create(*args, **kwargs) -> Person:
         return Manager(
-            id,
             fake.name(),
-            BasicFactory.create_phone_number(),
-            rand_from_bounds(department_id_bounds),
-            BasicFactory.create_email(),
-            choice(Manager.possible_positions)
+            RandomValueFactory.create_phone_number(),
+            RandomValueFactory.create_email(),
+            Department.bounds(Department).random(),
+            choice(Manager.possible_positions),
+            rand_bool(3)
         )
-
-    def tuplefy(self) -> Tuple:
-        return (self.id,
-                self.department_id,
-                self.name,
-                self.position) + \
-               self.phone_number.tuplefy() + \
-               self.email.tuplefy()
 
 
 @dataclass(frozen=True)
 class Courier(Person):
+    __instances__: ClassVar[List[Person]] = list()
+    """List of known instances of this class"""
+
+    table_name: ClassVar[str] = "couriers"
+
     is_active: bool
 
     def create(*args, **kwargs) -> Person:
-        id = Courier.latest_id
-        Courier.latest_id += 1
-
         return Courier(
-            id,
             fake.name(),
-            BasicFactory.create_phone_number(),
-            True # rand_bool()
+            RandomValueFactory.create_phone_number(),
+            RandomValueFactory.create_email() if rand_bool(3) else None,
+            rand_bool(3)
         )
 
-    def tuplefy(self) -> Tuple:
-        return (self.id,
-                self.name) + \
-               self.phone_number.tuplefy() + \
-               (self.is_active,)
+
+@dataclass
+class ActiveCourier(GeneratedEntry):
+    """Courier entry with is_active flag set to True"""
+
+    entry: Courier
+    """The entry itself"""

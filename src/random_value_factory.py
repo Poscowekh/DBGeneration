@@ -1,10 +1,8 @@
 from src.basics import *
 
 
-class BasicFactory:
-    """
-    Helps to create unique random values
-    """
+class RandomValueFactory:
+    """Static class. Helps to create unique random values"""
 
     @staticmethod
     def create(cls: type, unique: bool = True, *args, **kwargs) -> RandomValue:
@@ -14,28 +12,23 @@ class BasicFactory:
         :return: created instance of cls class
         """
 
-        result = cls.create()
-
         if unique:
-            while cls.exists(result):
-                result = cls.create(*args, **kwargs)
+            return cls.create_unique(cls, *args, **kwargs)
 
-        cls.register(result)
-
-        return result
+        return cls.create(*args, **kwargs)
 
     @staticmethod
-    def create_address() -> Address:
-        return BasicFactory.create(Address)
+    def create_address(unique: bool = True) -> Address:
+        return RandomValueFactory.create(Address, unique=unique)
 
     @staticmethod
-    def create_phone_number() -> PhoneNumber:
-        return BasicFactory.create(PhoneNumber)
+    def create_phone_number(unique: bool = True) -> PhoneNumber:
+        return RandomValueFactory.create(PhoneNumber, unique=unique)
 
     @staticmethod
-    def create_date(unique: bool = True, from_date: Date = None) -> Date:
-        return BasicFactory.create(Date, from_date)
+    def create_date(from_date: Date = None, unique: bool = True) -> Date:
+        return RandomValueFactory.create(Date, unique=unique, from_date=from_date)
 
     @staticmethod
-    def create_email() -> Email:
-        return BasicFactory.create(Email)
+    def create_email(unique: bool = True) -> Email:
+        return RandomValueFactory.create(Email, unique=unique)

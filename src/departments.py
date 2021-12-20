@@ -1,73 +1,64 @@
-from basic_factory import *
-from clothing import Clothing
+from src.random_value_factory import *
 
 
 @dataclass(frozen=True)
-class Facility(RandomEntry):
+class Building(RandomEntry):
     address: Address
     phone_number: PhoneNumber
     requires_shipment: bool
 
-    def to_tuple(self) -> Tuple:
-        return (self.id,) + \
-               self.address.to_tuple() + \
-               self.phone_number.to_tuple() + \
-               (self.requires_shipment,)
+    table_name: ClassVar[str] = "buildings"
 
-
-@dataclass(frozen=True)
-class Department(Facility):
-    def create(*args, **kwargs) -> Facility:
-        id = Department.latest_id
-        Department.latest_id += 1
-
-        return Department(
-            id,
-            BasicFactory.create_address(),
-            BasicFactory.create_phone_number(),
+    def __create__(*args, **kwargs) -> RandomEntry:
+        return Building(
+            RandomValueFactory.create_address(),
+            RandomValueFactory.create_phone_number(),
             rand_bool()
         )
 
 
 @dataclass(frozen=True)
-class SortingFacility(Facility):
-    def create(*args, **kwargs) -> Facility:
-        id = SortingFacility.latest_id
-        SortingFacility.latest_id += 1
+class Department(Building):
+    __instances__: ClassVar[List[Building]] = list()
+    """List of known instances of this class"""
 
-        return SortingFacility(
-            id,
-            BasicFactory.create_address(),
-            BasicFactory.create_phone_number(),
-            rand_bool()
-        )
+    table_name: ClassVar[str] = "departments"
+
+    def create(*args, **kwargs) -> Building:
+        return Building.__create__(*args, **kwargs)
 
 
 @dataclass(frozen=True)
-class CleaningFacility(Facility):
+class SortingDepartment(Building):
+    __instances__: ClassVar[List[Building]] = list()
+    """List of known instances of this class"""
+
+    table_name: ClassVar[str] = "sorting_departments"
+
+    def create(*args, **kwargs) -> Building:
+        return Building.__create__(*args, **kwargs)
+
+
+@dataclass(frozen=True)
+class CleaningDepartment(Building):
+    __instances__: ClassVar[List[Building]] = list()
+    """List of known instances of this class"""
+
+    table_name: ClassVar[str] = "cleaning_departments"
+
     acceptable_clothing_types: str  # TODO add clothing and defects
     acceptable_defect_types: str
 
-    clothing_type_bounds: ClassVar = (3, 7)
-    defect_type_bounds: ClassVar = (3, 7)
+    clothing_type_bounds: ClassVar[Bounds] = Bounds(3, 7)
+    defect_type_bounds: ClassVar[Bounds] = Bounds(3, 7)
 
-    def create(*args, **kwargs) -> Facility:
-        id = Facility.latest_id
-        Facility.latest_id += 1
+    def create(*args, **kwargs) -> Building:
+        base = Building.__create__()
 
-        return CleaningFacility(
-            id,
-            BasicFactory.create_address(),
-            BasicFactory.create_phone_number(),
-            rand_bool(),
-            ", ".join(choice(clothing_types, rand_from_bounds(CleaningFacility.clothing_type_bounds))),
-            ", ".join(choice(defect_types, rand_from_bounds(CleaningFacility.defect_type_bounds)))
+        return CleaningDepartment(
+            base.address,
+            base.phone_number,
+            base.requires_shipment,
+            ", ".join(choice(clothing_types, CleaningDepartment.clothing_type_bounds.random())),
+            ", ".join(choice(defect_types, CleaningDepartment.defect_type_bounds.random()))
         )
-
-    def to_tuple(self) -> Tuple:
-        return (self.id,) + \
-               self.address.to_tuple() + \
-               self.phone_number.to_tuple() + \
-               (self.requires_shipment,
-                self.acceptable_clothing_types,
-                self.acceptable_defect_types)
