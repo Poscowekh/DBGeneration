@@ -256,12 +256,28 @@ def none_or(any: Any) -> Union[None, Any]:
 
 
 clothing_types: array_t = array([
-    "PlaceholderClothingType"
+    "chiffon",
+    "cotton",
+    "crepe",
+    "denim",
+    "lace",
+    "leather",
+    "linen",
+    "satin",
+    "silk",
+    "synthetics",
+    "velvet",
+    "wool"
 ], dtype=str)
 
 
 defect_types: array_t = array([
-    "PlaceholderDefectType"
+    "ink stains",
+    "alcohol stains",
+    "smoke odor",
+    "dirt stains",
+    "physical defects",
+    "missing parts"
 ], dtype=str)
 
 

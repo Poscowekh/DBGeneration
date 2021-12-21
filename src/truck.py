@@ -14,7 +14,9 @@ class Truck(RandomEntry):
     is_in_working_condition: bool
 
     possible_labels: ClassVar[array_t] = array([
-        "PlaceholderTruckLabel"
+        "bad working condition",
+        "out of diesel",
+        "requires a bit of repairs"
     ], dtype=str)
 
     def create(active_couriers: List[ActiveCourier], *args, **kwargs) -> RandomEntry:

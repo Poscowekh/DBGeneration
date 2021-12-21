@@ -139,8 +139,8 @@ class Order(RandomEntry):
             is_express,
             to_be_delievered,
 
-            none_or(choice(Order.possible_customer_comments)),  # customer comment
-            none_or(choice(Order.possible_delivery_comments)) if to_be_delievered else None # delivery comment
+            None, #none_or(choice(Order.possible_customer_comments)),  # customer comment
+            None  #none_or(choice(Order.possible_delivery_comments)) if to_be_delievered else None # delivery comment
         )
 
 @dataclass

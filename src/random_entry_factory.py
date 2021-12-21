@@ -39,9 +39,9 @@ class RandomEntryFactory(RandomValueFactory):
         Manager: 600,
         Customer: 3500,
         Truck: 400,
-        Order: 5000,
+        Order: 9000,
         Shipment: 600,
-        Clothing: 10000
+        Clothing: 12000
     }
     """The layout of database: amount of entries to create for each of tables"""
 

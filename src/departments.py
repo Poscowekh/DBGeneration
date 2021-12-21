@@ -49,8 +49,8 @@ class CleaningDepartment(Building):
     acceptable_clothing_types: str  # TODO add clothing and defects
     acceptable_defect_types: str
 
-    clothing_type_bounds: ClassVar[Bounds] = Bounds(3, 7)
-    defect_type_bounds: ClassVar[Bounds] = Bounds(3, 7)
+    clothing_type_bounds: ClassVar[Bounds] = Bounds(1, 4)
+    defect_type_bounds: ClassVar[Bounds] = Bounds(1, 6)
 
     def create(*args, **kwargs) -> Building:
         base = Building.__create__()

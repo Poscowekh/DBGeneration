@@ -34,11 +34,35 @@ class Clothing(RandomEntry):
     name: str
     comment: str
 
-    type_bounds: ClassVar[Bounds] = Bounds(1, 1) # 3)
-    defect_type_bounds: ClassVar[Bounds] = Bounds(1, 1) # 4)
+    type_bounds: ClassVar[Bounds] = Bounds(1, 3)
+    defect_type_bounds: ClassVar[Bounds] = Bounds(1, 4)
 
     possible_clothing_names: ClassVar[array_t] = array([
-        "PlaceholderClothingName"
+        "Sweater",
+        "Dress",
+        "Hoodies",
+        "T-shirt",
+        "Shorts",
+        "Skirt",
+        "Jeans",
+        "Shoes",
+        "Coat",
+        "High heels",
+        "Suit",
+        "Cap",
+        "Socks",
+        "Shirt",
+        "Scarf",
+        "Swimsuit",
+        "Hat",
+        "Gloves",
+        "Jacket",
+        "Long coat",
+        "Boots",
+        "Sunglasses",
+        "Tie",
+        "Polo shirt",
+        "Leather jackets"
     ], dtype=str)
 
     possible_statuses: ClassVar[array_t] = array([
@@ -50,7 +74,7 @@ class Clothing(RandomEntry):
     ], dtype=ClothingStatus)
 
     possible_clothing_comment: ClassVar[array_t] = array([
-        "PlaceholderClothingComment"
+        None
     ], dtype=str)
 
     i: ClassVar = 0
@@ -74,6 +98,6 @@ class Clothing(RandomEntry):
             status,
             none_or(", ".join(choice(clothing_types, Clothing.type_bounds.random()))),
             none_or(", ".join(choice(defect_types, Clothing.defect_type_bounds.random()))),
-            none_or(choice(Clothing.possible_clothing_names)),
-            none_or(choice(Clothing.possible_clothing_comment))
+            choice(Clothing.possible_clothing_names),
+            None # none_or(choice(Clothing.possible_clothing_comment))
         )
